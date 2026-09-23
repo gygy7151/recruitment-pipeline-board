@@ -64,6 +64,8 @@ export function useApplicants() {
   const [applicants, setApplicants] = useState<Applicant[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [toasts, setToasts] = useState<Toast[]>([])
+  /** 목록 조회 시도 번호. 올리면 조회 effect가 다시 돈다. */
+  const [loadAttempt, setLoadAttempt] = useState(0)
 
   /** 카드별로 서버가 마지막에 확정해 준 모습. 롤백의 기준점이다. */
   const confirmed = useRef(new Map<string, Applicant>())
@@ -94,6 +96,12 @@ export function useApplicants() {
     return () => {
       cancelled = true
     }
+  }, [loadAttempt])
+
+  /** 조회 실패 후 다시 불러온다. 앞선 시도의 응답은 effect 정리에서 버려진다. */
+  const reload = useCallback(() => {
+    setStatus('loading')
+    setLoadAttempt((attempt) => attempt + 1)
   }, [])
 
   // 남아 있는 토스트 타이머를 정리한다.
@@ -185,5 +193,5 @@ export function useApplicants() {
     [sendMove],
   )
 
-  return { applicants, status, toasts, moveApplicant, dismissToast }
+  return { applicants, status, toasts, moveApplicant, dismissToast, reload }
 }

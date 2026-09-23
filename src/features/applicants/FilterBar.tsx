@@ -9,6 +9,8 @@ type FilterBarProps = {
   roles: string[]
   resultCount: number
   isFiltering: boolean
+  /** 목록을 불러오는 동안. 자리는 지키되 입력은 받지 않는다. */
+  disabled?: boolean
 }
 
 export function FilterBar({
@@ -19,6 +21,7 @@ export function FilterBar({
   roles,
   resultCount,
   isFiltering,
+  disabled = false,
 }: FilterBarProps) {
   return (
     <div className={styles.bar}>
@@ -33,6 +36,7 @@ export function FilterBar({
           value={query}
           placeholder="지원자 이름"
           autoComplete="off"
+          disabled={disabled}
           onChange={(event) => onQueryChange(event.target.value)}
         />
       </div>
@@ -45,6 +49,7 @@ export function FilterBar({
           id="applicant-role"
           className={styles.select}
           value={role}
+          disabled={disabled}
           onChange={(event) => onRoleChange(event.target.value)}
         >
           <option value={ALL_ROLES}>전체 직무</option>

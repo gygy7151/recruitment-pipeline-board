@@ -4,7 +4,8 @@ import styles from './Column.module.css'
 
 type ColumnProps = {
   column: BoardColumn
-  count: number
+  /** 컬럼의 인원 수. 아직 불러오는 중이라 모르면 null이고, 인원 수 자리를 비워 둔다. */
+  count: number | null
   /** 좁은 화면에서 지금 보이는 컬럼인지. 넓은 화면에서는 CSS가 무시한다. */
   isActive: boolean
   children?: ReactNode
@@ -25,14 +26,23 @@ export function Column({ column, count, isActive, children }: ColumnProps) {
         <h2 id={headingId} className={styles.title}>
           {column.label}
         </h2>
-        <span className={styles.count}>
-          {count}
-          <span className={styles.srOnly}>명</span>
-        </span>
+        {count === null ? (
+          <span className={`${styles.count} ${styles.countPending}`} aria-hidden="true" />
+        ) : (
+          <span className={styles.count}>
+            {count}
+            <span className={styles.srOnly}>명</span>
+          </span>
+        )}
       </header>
-      <ul className={styles.body} role="list">
-        {children}
-      </ul>
+      {count === 0 ? (
+        // 빈 목록을 그대로 두면 컬럼이 고장 난 것처럼 보인다. 목록 대신 안내를 둔다.
+        <p className={styles.empty}>이 단계에 지원자가 없습니다.</p>
+      ) : (
+        <ul className={styles.body} role="list">
+          {children}
+        </ul>
+      )}
     </section>
   )
 }
