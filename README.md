@@ -2,6 +2,11 @@
 
 채용 단계별 지원자 관리 및 파이프라인 보드
 
+**배포**: https://recruitment-pipeline-board-pv39yj9cr-gygy7151s-projects.vercel.app/
+
+Vercel에 배포되어 있다. mock API가 브라우저의 localStorage를 쓰므로 방문자마다 독립된 데이터를 갖는다.
+조회에도 약 15% 확률의 실패가 적용되어 있어, 처음 열었을 때 에러가 보이면 새로고침하면 된다.
+
 ## 실행
 
 Node 20 이상이 필요합니다 (`.nvmrc` 참고).
