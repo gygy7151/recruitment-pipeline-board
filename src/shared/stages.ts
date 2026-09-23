@@ -11,3 +11,4 @@ export const STAGES = [
 ] as const
 
 export type Stage = (typeof STAGES)[number]
+export type StageId = Stage['id']
