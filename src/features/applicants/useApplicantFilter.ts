@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import type { Applicant } from '../../shared/applicant'
+import { createChosungMatcher } from '../../shared/hangul'
 
 export const ALL_ROLES = '__all__'
 
@@ -10,6 +11,9 @@ function normalize(value: string): string {
 
 /**
  * 이름 검색과 직무 필터.
+ *
+ * 이름은 초성으로도 찾을 수 있다(`ㅎㅅㅂ` → 한수빈). 초성은 필터가 돌 때마다 계산한다.
+ * 음절 하나당 나눗셈 한 번이라 미리 계산해 캐시를 무효화하는 것보다 단순하다.
  *
  * 1,000건을 훑는 비용은 마이크로초 단위라 문제가 아니다. 진짜 비용은 키를 누를 때마다
  * 최대 1,000장의 카드를 다시 그리는 React 재조정이다. 그래서 `useDeferredValue`로
@@ -37,9 +41,11 @@ export function useApplicantFilter(applicants: Applicant[]) {
 
     if (!keyword && !byRole) return applicants
 
+    const matchesName = keyword ? createChosungMatcher(keyword) : null
+
     return applicants.filter((applicant) => {
       if (byRole && applicant.role !== deferredRole) return false
-      if (keyword && !applicant.name.toLowerCase().includes(keyword)) return false
+      if (matchesName && !matchesName(applicant.name.toLowerCase())) return false
       return true
     })
   }, [applicants, deferredQuery, deferredRole])

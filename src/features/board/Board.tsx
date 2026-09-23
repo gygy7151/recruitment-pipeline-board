@@ -11,6 +11,7 @@ import {
   type StageId,
 } from '../../shared/stages'
 import { ApplicantCard } from '../applicants/ApplicantCard'
+import { ApplicantDrawer } from '../applicants/ApplicantDrawer'
 import { ResultConfirmDialog } from '../applicants/ResultConfirmDialog'
 import type { MoveOutcome } from '../applicants/useApplicants'
 import { Column } from './Column'
@@ -55,6 +56,15 @@ export function Board({ applicants, onMove }: BoardProps) {
   const [pendingDecision, setPendingDecision] = useState<PendingDecision | null>(null)
   // 좁은 화면에서 지금 보이는 컬럼. 넓은 화면에서는 네 컬럼이 모두 보여 쓰이지 않는다.
   const [activeColumn, setActiveColumn] = useState<ColumnId>(COLUMNS[0].id)
+  // 상세에 띄운 지원자. 객체가 아니라 id를 들고 목록에서 찾는다. 열기 직전에 보낸 이동이
+  // 열려 있는 동안 롤백돼도 drawer가 실제 단계를 보여주게 하기 위해서다.
+  const [detailId, setDetailId] = useState<string | null>(null)
+  const detailApplicant = useMemo(
+    () => (detailId ? (applicants.find((applicant) => applicant.id === detailId) ?? null) : null),
+    [applicants, detailId],
+  )
+  // 목록에서 사라졌으면 id도 비운다. 남겨 두면 같은 id가 다시 나타날 때 drawer가 저절로 열린다.
+  if (detailId && !detailApplicant) setDetailId(null)
 
   // 컬럼마다 filter를 돌리면 1,000건 × 컬럼 수만큼 순회하게 된다. 한 번만 순회해 컬럼별로 나눈다.
   const byColumn = useMemo(() => {
@@ -149,6 +159,18 @@ export function Board({ applicants, onMove }: BoardProps) {
     }
   }, [pendingDecision])
 
+  const handleOpenDetail = useCallback((applicant: Applicant) => {
+    setDetailId(applicant.id)
+  }, [])
+
+  const handleCloseDetail = useCallback(() => {
+    const closedId = detailId
+    setDetailId(null)
+    // 카드 빈 곳을 마우스로 눌러 연 경우 브라우저가 돌려줄 포커스가 없다. 어느 경로로 열었든
+    // 그 카드의 이름 버튼으로 돌아가게 직접 잡는다.
+    if (closedId) focusAfterRender([`[data-detail="${closedId}"]`])
+  }, [detailId])
+
   return (
     <div className={styles.boardShell}>
       <ColumnTabs
@@ -173,6 +195,7 @@ export function Board({ applicants, onMove }: BoardProps) {
                   applicant={applicant}
                   onMove={handleMove}
                   onToggleResult={handleToggleResult}
+                  onOpenDetail={handleOpenDetail}
                 />
               ))}
             </Column>
@@ -185,6 +208,8 @@ export function Board({ applicants, onMove }: BoardProps) {
         onDecide={handleDecide}
         onCancel={handleCancelDecision}
       />
+
+      <ApplicantDrawer applicant={detailApplicant} onClose={handleCloseDetail} />
     </div>
   )
 }

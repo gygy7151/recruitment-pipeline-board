@@ -44,7 +44,7 @@ type MoveContext = {
  * 지원자의 단계를 바꾼다. 자리 규칙은 서버(`moveStage`)와 똑같이 맞춘다.
  * 어긋나면 새로고침했을 때 카드가 다른 자리에 나타난다.
  */
-function applyMove(
+export function applyMove(
   applicants: Applicant[],
   id: string,
   toStage: StageId,
@@ -117,6 +117,8 @@ export function useApplicants() {
   const [applicants, setApplicants] = useState<Applicant[]>([])
   const [status, setStatus] = useState<LoadStatus>('loading')
   const [toasts, setToasts] = useState<Toast[]>([])
+  /** 목록 조회 시도 번호. 올리면 조회 effect가 다시 돈다. */
+  const [loadAttempt, setLoadAttempt] = useState(0)
 
   /** 이동 직전 자리를 읽기 위한 최신 목록. 이동 함수가 목록이 바뀔 때마다 새로 만들어지지 않게 ref로 둔다. */
   const latestApplicants = useRef(applicants)
@@ -155,6 +157,12 @@ export function useApplicants() {
     return () => {
       cancelled = true
     }
+  }, [loadAttempt])
+
+  /** 조회 실패 후 다시 불러온다. 앞선 시도의 응답은 effect 정리에서 버려진다. */
+  const reload = useCallback(() => {
+    setStatus('loading')
+    setLoadAttempt((attempt) => attempt + 1)
   }, [])
 
   // 남아 있는 토스트 타이머를 정리한다.
@@ -291,7 +299,9 @@ export function useApplicants() {
       const before = currentSpot(latestApplicants.current, id)
       const context: MoveContext = {
         undo: recordUndo ? before : null,
-        rollback: before ? { after: before.after } : placement,
+        // 제자리 이동(결과 토글)은 카드가 자리를 떠난 적이 없으므로 제자리에서 되돌린다.
+        // 앞 카드 기준으로 다시 끼우면 컬럼 순서는 같아도 전체 목록에서 자리가 바뀐다.
+        rollback: placement === 'keep' || !before ? placement : { after: before.after },
       }
 
       const requestId = ++requestCounter.current
@@ -345,5 +355,6 @@ export function useApplicants() {
     undoMove,
     dismissToast,
     setToastsPaused,
+    reload,
   }
 }

@@ -2,6 +2,11 @@
 
 채용 단계별 지원자 관리 및 파이프라인 보드
 
+**배포**: https://recruitment-pipeline-board-pv39yj9cr-gygy7151s-projects.vercel.app/
+
+Vercel에 배포되어 있다. mock API가 브라우저의 localStorage를 쓰므로 방문자마다 독립된 데이터를 갖는다.
+조회에도 약 15% 확률의 실패가 적용되어 있어, 처음 열었을 때 에러가 보이면 새로고침하면 된다.
+
 ## 실행
 
 Node 20 이상이 필요합니다 (`.nvmrc` 참고).
@@ -12,6 +17,7 @@ npm run dev        # 개발 서버
 npm run build      # tsc -b && vite build
 npm run typecheck  # 타입 검사
 npm run lint       # oxlint
+npm test           # vitest (롤백·경쟁 상태, 조회 재시도 테스트)
 ```
 
 ## 구현 범위
@@ -29,10 +35,12 @@ npm run lint       # oxlint
 | responsive | 모바일 화면 대응 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 완료 |
-| detail-panel | Must 5 | 예정 |
-| loading-error-empty | Must 6 | 예정 |
+| rollback-test | Should (롤백·경쟁 상태 테스트) | 완료 |
+| chosung-search | Should (초성 이름 검색) | 완료 |
+| detail-panel | Must 5 | 완료 |
+| loading-error-empty | Must 6 (로딩 스켈레톤 · 에러 + 재시도 · 빈 컬럼/0건) | 완료 |
 | undo | Should (되돌리기) — 앞 카드 기준 원위치 복원, Ctrl/⌘+Z | 완료 |
-| a11y-keyboard · rollback-test · virtualization | Should | 예정 |
+| a11y-keyboard · virtualization | Should | 예정 |
 
 저장되는 채용 단계는 서류검토 · 면접 · 처우협의 · 최종합격 · 불합격 5개다. 화면의 컬럼은 **서류검토 → 면접 → 처우협의 → 결과** 4개이며, 결과 컬럼이 최종합격과 불합격을 함께 담는다. 카드의 칩을 눌러 두 결과를 전환한다. 단계와 컬럼 정의 모두 `src/shared/stages.ts`가 단일 출처다.
 

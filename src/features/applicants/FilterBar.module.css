@@ -36,6 +36,13 @@
   width: 200px;
 }
 
+.input:disabled,
+.select:disabled {
+  color: #8c959f;
+  background: #f6f8fa;
+  cursor: not-allowed;
+}
+
 .input:focus-visible,
 .select:focus-visible {
   outline: 2px solid #0969da;
