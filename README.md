@@ -29,7 +29,7 @@ npm run lint       # oxlint
 | responsive | 모바일 화면 대응 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 완료 |
-| detail-panel | Must 5 | 예정 |
+| detail-panel | Must 5 | 완료 |
 | loading-error-empty | Must 6 | 예정 |
 | a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
 
