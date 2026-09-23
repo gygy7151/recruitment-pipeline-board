@@ -12,3 +12,10 @@ export const STAGES = [
 
 export type Stage = (typeof STAGES)[number]
 export type StageId = Stage['id']
+
+const STAGE_LABELS = new Map<StageId, string>(STAGES.map((stage) => [stage.id, stage.label]))
+
+/** 단계 id로 화면에 쓸 한글 라벨을 찾는다. 저장된 값이 현재 단계 목록에 없으면 id를 그대로 보여준다. */
+export function stageLabel(id: StageId): string {
+  return STAGE_LABELS.get(id) ?? id
+}

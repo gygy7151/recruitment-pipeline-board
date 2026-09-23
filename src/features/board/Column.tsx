@@ -22,7 +22,9 @@ export function Column({ stage, count, children }: ColumnProps) {
           <span className={styles.srOnly}>명</span>
         </span>
       </header>
-      <div className={styles.body}>{children}</div>
+      <ul className={styles.body} role="list">
+        {children}
+      </ul>
     </section>
   )
 }

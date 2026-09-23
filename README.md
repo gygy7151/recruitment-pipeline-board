@@ -21,7 +21,7 @@ npm run lint       # oxlint
 | init | - | 완료 |
 | board-layout | Must 1 (보드/컬럼) | 완료 |
 | mock-api | Must 2·3 전제 | 완료 |
-| card-list | Must 1 (카드) | 예정 |
+| card-list | Must 1 (카드) | 완료 |
 | stage-move | Must 2 | 예정 |
 | optimistic-update | Must 3 | 예정 |
 | search-filter | Must 4 | 예정 |

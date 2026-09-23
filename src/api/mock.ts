@@ -1,5 +1,5 @@
 import type { Applicant } from '../shared/applicant'
-import type { StageId } from '../shared/stages'
+import { STAGES, type StageId } from '../shared/stages'
 import { createSeedApplicants } from './seed'
 
 /**
@@ -28,10 +28,15 @@ export class MockApiError extends Error {
   }
 }
 
+const KNOWN_STAGE_IDS = new Set<string>(STAGES.map((stage) => stage.id))
+
 /**
  * 저장된 데이터가 현재 모델과 맞는지 첫 항목으로만 확인한다.
  * 모델이 바뀐 뒤 옛 데이터가 조용히 살아남아 화면이 깨지는 것을 막는 용도라
  * 1,000건을 모두 순회할 필요는 없다.
+ *
+ * stage는 문자열인지가 아니라 실제 단계 id인지까지 본다. 알 수 없는 단계가 들어오면
+ * 화면에서 그 카드가 어느 컬럼에도 들어가지 못하고 아무 표시 없이 사라지기 때문이다.
  */
 function isApplicantLike(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false
@@ -39,7 +44,8 @@ function isApplicantLike(value: unknown): boolean {
   return (
     typeof candidate.id === 'string' &&
     typeof candidate.name === 'string' &&
-    typeof candidate.stage === 'string'
+    typeof candidate.stage === 'string' &&
+    KNOWN_STAGE_IDS.has(candidate.stage)
   )
 }
 

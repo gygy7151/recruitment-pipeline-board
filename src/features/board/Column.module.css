@@ -37,8 +37,10 @@
 .body {
   flex: 1 1 auto;
   min-height: 120px;
+  margin: 0;
   padding: 10px;
   overflow-y: auto;
+  list-style: none;
 }
 
 .srOnly {
