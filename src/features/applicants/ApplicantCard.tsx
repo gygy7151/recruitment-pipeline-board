@@ -10,9 +10,27 @@ import {
 } from '../../shared/stages'
 import styles from './ApplicantCard.module.css'
 
+/**
+ * 이동을 시작한 버튼의 종류. 이동하면 카드가 다시 그려져 그 버튼이 사라지므로,
+ * 보드가 새 위치에서 같은 종류의 버튼을 찾아 포커스를 돌려준다.
+ */
+export type FocusOrigin = 'move' | 'name' | 'toggle'
+
+function focusOriginOf(target: EventTarget): FocusOrigin {
+  if (!(target instanceof Element)) return 'move'
+  if (target.closest('[data-detail]')) return 'name'
+  if (target.closest('[data-toggle]')) return 'toggle'
+  return 'move'
+}
+
 type ApplicantCardProps = {
   applicant: Applicant
-  onMove: (applicant: Applicant, toStage: StageId, direction: MoveDirection) => void
+  onMove: (
+    applicant: Applicant,
+    toStage: StageId,
+    direction: MoveDirection,
+    origin: FocusOrigin,
+  ) => void
   onToggleResult: (applicant: Applicant, toStage: StageId) => void
   onOpenDetail: (applicant: Applicant) => void
 }
@@ -37,11 +55,26 @@ export function ApplicantCard({
     onOpenDetail(applicant)
   }
 
-  // 카드 안 어느 버튼에 포커스가 있든 ↑로 상세를 연다 (DECISIONS.md "가정: 키보드 조작 규칙" 4번).
+  // 카드 안 어느 버튼에 포커스가 있든 ↑로 상세를 열고 ←/→로 옮긴다
+  // (DECISIONS.md "가정: 키보드 조작 규칙" 1·2·4번).
   const handleCardKeyDown = (event: KeyboardEvent<HTMLLIElement>) => {
-    if (event.key !== 'ArrowUp' || event.altKey || event.ctrlKey || event.metaKey) return
+    if (event.altKey || event.ctrlKey || event.metaKey) return
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      onOpenDetail(applicant)
+      return
+    }
+
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    // 경계에서도 기본 동작(가로 스크롤)을 막는다. 무동작이 규칙이다.
     event.preventDefault()
-    onOpenDetail(applicant)
+    // 키를 누르고 있어 생긴 반복 입력은 버린다. 한 번 누르면 한 칸만 옮긴다.
+    // 그러지 않으면 카드가 처우협의까지 달려가 확인 창이 뜬다.
+    if (event.repeat) return
+    const direction: MoveDirection = event.key === 'ArrowLeft' ? 'prev' : 'next'
+    const toStage = direction === 'prev' ? previousStage : nextStage
+    if (toStage) onMove(applicant, toStage, direction, focusOriginOf(event.target))
   }
 
   return (
@@ -86,7 +119,7 @@ export function ApplicantCard({
               ? `${applicant.name}: ${stageLabel(previousStage)} 단계로 이동`
               : `${applicant.name}: 이전 단계 없음`
           }
-          onClick={() => previousStage && onMove(applicant, previousStage, 'prev')}
+          onClick={() => previousStage && onMove(applicant, previousStage, 'prev', 'move')}
         >
           ←
         </button>
@@ -101,7 +134,7 @@ export function ApplicantCard({
               ? `${applicant.name}: ${stageLabel(nextStage)} 단계로 이동`
               : `${applicant.name}: 다음 단계 없음`
           }
-          onClick={() => nextStage && onMove(applicant, nextStage, 'next')}
+          onClick={() => nextStage && onMove(applicant, nextStage, 'next', 'move')}
         >
           →
         </button>
