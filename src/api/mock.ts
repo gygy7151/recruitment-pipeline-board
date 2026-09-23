@@ -1,4 +1,5 @@
 import type { Applicant } from '../shared/applicant'
+import { insertAfter } from '../shared/order'
 import { STAGES, type StageId } from '../shared/stages'
 import { createSeedApplicants } from './seed'
 
@@ -108,11 +109,14 @@ export async function getApplicants(): Promise<Applicant[]> {
  *          카드가 대상 컬럼의 마지막에 놓인다 (DECISIONS.md "가정: 키보드 조작 규칙" 3번).
  * - `keep` 자리를 그대로 둔다. 같은 컬럼 안에서 결과만 바꾸는 경우다. 도착이 아니라 정정이므로
  *          자리가 움직일 이유가 없다.
+ * - `{ after }` 지정한 지원자 바로 뒤에 끼운다. 되돌리기가 카드를 원래 자리로 돌려놓을 때 쓴다.
+ *          `null`이면 맨 앞, 그 지원자를 찾지 못하면 끝으로 보낸다. 컬럼은 이 목록을 걸러낸
+ *          부분열이므로, 같은 컬럼의 앞 카드 뒤에 끼우면 컬럼 안의 원래 순서가 돌아온다.
  *
  * 화면에서만 자리를 지키고 서버는 끝으로 보내면 새로고침했을 때 카드가 튄다. 그래서 저장 쪽에도
  * 같은 구분이 있어야 한다.
  */
-export type StagePlacement = 'end' | 'keep'
+export type StagePlacement = 'end' | 'keep' | { after: string | null }
 
 /**
  * 단계 변경.
@@ -137,9 +141,12 @@ export async function moveStage(
   if (placement === 'keep') {
     // 자리를 바꾸지 않으므로 원소만 갈아끼운다. 그 사이 다른 카드가 움직여도 영향이 없다.
     applicants[index] = moved
-  } else {
+  } else if (placement === 'end') {
     applicants.splice(index, 1)
     applicants.push(moved)
+  } else {
+    applicants.splice(index, 1)
+    insertAfter(applicants, moved, placement.after)
   }
 
   writeStore()
