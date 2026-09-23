@@ -16,9 +16,20 @@ npm run lint       # oxlint
 
 ## 구현 범위
 
-| feature | Must/Should | 커밋 | 상태 |
-|---|---|---|---|
-| init | - | (아래 커밋 로그) | 완료 |
+| feature | 요구사항 | 상태 |
+|---|---|---|
+| init | - | 완료 |
+| board-layout | Must 1 (보드/컬럼) | 완료 |
+| mock-api | Must 2·3 전제 | 예정 |
+| card-list | Must 1 (카드) | 예정 |
+| stage-move | Must 2 | 예정 |
+| optimistic-update | Must 3 | 예정 |
+| search-filter | Must 4 | 예정 |
+| detail-panel | Must 5 | 예정 |
+| loading-error-empty | Must 6 | 예정 |
+| a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
+
+채용 단계는 서류검토 → 면접 → 처우협의 → 최종합격 / 불합격 5개이며 `src/shared/stages.ts`가 단일 출처다.
 
 ## Mock API
 

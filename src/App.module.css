@@ -1,0 +1,29 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.header {
+  flex: 0 0 auto;
+  padding: 16px 24px 12px;
+  background: #fff;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #59636e;
+}
+
+.main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
