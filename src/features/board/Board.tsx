@@ -6,11 +6,12 @@ import {
   columnIdOf,
   isResultDecision,
   resultStageFor,
+  stageLabel,
   type ColumnId,
   type MoveDirection,
   type StageId,
 } from '../../shared/stages'
-import { ApplicantCard } from '../applicants/ApplicantCard'
+import { ApplicantCard, type FocusOrigin } from '../applicants/ApplicantCard'
 import { ApplicantDrawer } from '../applicants/ApplicantDrawer'
 import { ResultConfirmDialog } from '../applicants/ResultConfirmDialog'
 import type { MoveOutcome } from '../applicants/useApplicants'
@@ -27,10 +28,30 @@ type BoardProps = {
 type PendingDecision = {
   applicant: Applicant
   direction: MoveDirection
+  origin: FocusOrigin
+}
+
+/** 스크린리더에 읽힐 이동 결과. 같은 문구가 이어져도 다시 읽히도록 번호로 노드를 바꾼다. */
+type Announcement = {
+  id: number
+  message: string
 }
 
 function moveButtonSelector(id: string, direction: MoveDirection): string {
   return `[data-move="${id}:${direction}"]`
+}
+
+/**
+ * 이동을 시작한 버튼과 같은 종류의 버튼을 새 위치에서 찾는 후보 목록. 앞에서부터 시도한다.
+ * - 이동 버튼: 경계 컬럼으로 옮겨가면 같은 방향 버튼이 비활성이 되므로 반대쪽을 둘째 후보로 둔다.
+ * - 칩: 결과 컬럼을 떠나면 칩이 사라지므로 이름 버튼을 둘째 후보로 둔다.
+ */
+function focusSelectors(id: string, direction: MoveDirection, origin: FocusOrigin): string[] {
+  const name = `[data-detail="${id}"]`
+  if (origin === 'name') return [name]
+  if (origin === 'toggle') return [`[data-toggle="${id}"]`, name]
+  const other: MoveDirection = direction === 'next' ? 'prev' : 'next'
+  return [moveButtonSelector(id, direction), moveButtonSelector(id, other)]
 }
 
 /**
@@ -59,6 +80,7 @@ export function Board({ applicants, onMove }: BoardProps) {
   // 상세에 띄운 지원자. 객체가 아니라 id를 들고 목록에서 찾는다. 열기 직전에 보낸 이동이
   // 열려 있는 동안 롤백돼도 drawer가 실제 단계를 보여주게 하기 위해서다.
   const [detailId, setDetailId] = useState<string | null>(null)
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null)
   const detailApplicant = useMemo(
     () => (detailId ? (applicants.find((applicant) => applicant.id === detailId) ?? null) : null),
     [applicants, detailId],
@@ -77,12 +99,12 @@ export function Board({ applicants, onMove }: BoardProps) {
 
   const runWithFocus = useCallback(
     async (
-      id: string,
+      applicant: Applicant,
       toStage: StageId,
       placement: StagePlacement,
       selectors: string[],
     ): Promise<MoveOutcome> => {
-      const outcome = onMove(id, toStage, placement)
+      const outcome = onMove(applicant.id, toStage, placement)
 
       // 낙관적 반영이라 카드는 이미 옮겨갔다. 응답을 기다리지 않고 바로 포커스를 따라 보낸다.
       focusAfterRender(selectors)
@@ -94,25 +116,41 @@ export function Board({ applicants, onMove }: BoardProps) {
         focusAfterRender(selectors, true)
       }
 
+      // 화면을 보는 사람에게는 카드가 옮겨간 것 자체가 안내다. 스크린리더에는 서버가 확정한 뒤에 알린다.
+      // 실패는 토스트가, 뒤이은 요청에 밀린 응답은 그 요청이 알린다.
+      if (settled === 'confirmed') {
+        // 결과 토글(keep)은 자리를 지키는 정정이라 "옮겼다"가 아니라 "변경했다"로 읽힌다.
+        const verb = placement === 'keep' ? '변경했습니다' : '옮겼습니다'
+        setAnnouncement((previous) => ({
+          id: (previous?.id ?? 0) + 1,
+          message: `${applicant.name}: ${stageLabel(toStage)} 단계로 ${verb}.`,
+        }))
+      }
+
       return settled
     },
     [onMove],
   )
 
   const moveToColumn = useCallback(
-    async (applicant: Applicant, toStage: StageId, direction: MoveDirection) => {
-      const other: MoveDirection = direction === 'next' ? 'prev' : 'next'
+    async (
+      applicant: Applicant,
+      toStage: StageId,
+      direction: MoveDirection,
+      origin: FocusOrigin,
+    ) => {
       const fromColumn = columnIdOf(applicant.stage)
 
       // 좁은 화면에서는 옮겨간 컬럼으로 함께 넘어간다. 그러지 않으면 카드가 보이지 않는 곳으로
       // 사라져 어디로 갔는지 알 수 없다.
       setActiveColumn(columnIdOf(toStage))
 
-      // 경계 컬럼으로 옮겨가면 같은 방향 버튼이 비활성이 된다. 그때는 반대쪽 버튼을 잡는다.
-      const outcome = await runWithFocus(applicant.id, toStage, 'end', [
-        moveButtonSelector(applicant.id, direction),
-        moveButtonSelector(applicant.id, other),
-      ])
+      const outcome = await runWithFocus(
+        applicant,
+        toStage,
+        'end',
+        focusSelectors(applicant.id, direction, origin),
+      )
 
       // 되돌아왔으면 보이는 컬럼도 함께 되돌린다.
       if (outcome === 'rolled-back') setActiveColumn(fromColumn)
@@ -121,13 +159,13 @@ export function Board({ applicants, onMove }: BoardProps) {
   )
 
   const handleMove = useCallback(
-    (applicant: Applicant, toStage: StageId, direction: MoveDirection) => {
+    (applicant: Applicant, toStage: StageId, direction: MoveDirection, origin: FocusOrigin) => {
       // 합격 여부가 걸린 이동은 묻고 나서 옮긴다. 확인 전에는 카드가 움직이지 않는다.
       if (isResultDecision(toStage, direction)) {
-        setPendingDecision({ applicant, direction })
+        setPendingDecision({ applicant, direction, origin })
         return
       }
-      void moveToColumn(applicant, toStage, direction)
+      void moveToColumn(applicant, toStage, direction, origin)
     },
     [moveToColumn],
   )
@@ -135,7 +173,7 @@ export function Board({ applicants, onMove }: BoardProps) {
   const handleToggleResult = useCallback(
     (applicant: Applicant, toStage: StageId) => {
       // 결과 전환은 도착이 아니라 정정이므로 자리를 지킨다. 확인 창도 띄우지 않는다.
-      void runWithFocus(applicant.id, toStage, 'keep', [`[data-toggle="${applicant.id}"]`])
+      void runWithFocus(applicant, toStage, 'keep', [`[data-toggle="${applicant.id}"]`])
     },
     [runWithFocus],
   )
@@ -143,9 +181,9 @@ export function Board({ applicants, onMove }: BoardProps) {
   const handleDecide = useCallback(
     (hired: boolean) => {
       if (!pendingDecision) return
-      const { applicant, direction } = pendingDecision
+      const { applicant, direction, origin } = pendingDecision
       setPendingDecision(null)
-      void moveToColumn(applicant, resultStageFor(hired), direction)
+      void moveToColumn(applicant, resultStageFor(hired), direction, origin)
     },
     [pendingDecision, moveToColumn],
   )
@@ -153,9 +191,11 @@ export function Board({ applicants, onMove }: BoardProps) {
   const handleCancelDecision = useCallback(() => {
     const cancelled = pendingDecision
     setPendingDecision(null)
-    // 아무것도 바꾸지 않았으므로 원래 누르던 버튼으로 포커스를 돌려준다.
+    // 아무것도 바꾸지 않았으므로 이동을 시작한 버튼으로 포커스를 돌려준다.
     if (cancelled) {
-      focusAfterRender([moveButtonSelector(cancelled.applicant.id, cancelled.direction)])
+      focusAfterRender(
+        focusSelectors(cancelled.applicant.id, cancelled.direction, cancelled.origin),
+      )
     }
   }, [pendingDecision])
 
@@ -210,6 +250,11 @@ export function Board({ applicants, onMove }: BoardProps) {
       />
 
       <ApplicantDrawer applicant={detailApplicant} onClose={handleCloseDetail} />
+
+      {/* 이동 성공 안내. 화면에는 보이지 않는다. key가 바뀌면 같은 문구도 다시 읽힌다. */}
+      <div className={styles.srOnly} role="status">
+        {announcement && <span key={announcement.id}>{announcement.message}</span>}
+      </div>
     </div>
   )
 }

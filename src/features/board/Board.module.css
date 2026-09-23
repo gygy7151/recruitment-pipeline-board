@@ -22,3 +22,8 @@
     overflow-x: hidden;
   }
 }
+
+/* 스크린리더 전용. 같은 규칙을 두 번 쓰지 않도록 컬럼의 것을 가져온다. */
+.srOnly {
+  composes: srOnly from './Column.module.css';
+}
