@@ -43,6 +43,27 @@
   list-style: none;
 }
 
+.countPending {
+  width: 32px;
+  height: 22px;
+}
+
+/* 목록 자리를 그대로 차지해, 비어 있어도 컬럼 높이가 다른 컬럼과 어긋나지 않게 한다. */
+.empty {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  margin: 10px;
+  padding: 16px;
+  font-size: 13px;
+  color: #59636e;
+  text-align: center;
+  border: 1px dashed #c4ccd4;
+  border-radius: 6px;
+}
+
 .srOnly {
   position: absolute;
   width: 1px;
