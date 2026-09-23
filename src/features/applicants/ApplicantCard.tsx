@@ -4,7 +4,6 @@ import styles from './ApplicantCard.module.css'
 
 type ApplicantCardProps = {
   applicant: Applicant
-  isMoving: boolean
   onMove: (id: string, toStage: StageId, direction: MoveDirection) => void
 }
 
@@ -14,7 +13,7 @@ function formatAppliedAt(isoDate: string): string {
   return `${year}. ${month}. ${day}.`
 }
 
-export function ApplicantCard({ applicant, isMoving, onMove }: ApplicantCardProps) {
+export function ApplicantCard({ applicant, onMove }: ApplicantCardProps) {
   const previousStage = adjacentStage(applicant.stage, 'prev')
   const nextStage = adjacentStage(applicant.stage, 'next')
 
@@ -32,7 +31,7 @@ export function ApplicantCard({ applicant, isMoving, onMove }: ApplicantCardProp
           // 이동하면 카드가 다른 컬럼으로 옮겨가 이 버튼이 사라진다.
           // 보드가 이 속성으로 새 위치의 같은 버튼을 찾아 포커스를 옮긴다.
           data-move={`${applicant.id}:prev`}
-          disabled={isMoving || previousStage === null}
+          disabled={previousStage === null}
           aria-label={
             previousStage
               ? `${applicant.name}: ${stageLabel(previousStage)} 단계로 이동`
@@ -47,7 +46,7 @@ export function ApplicantCard({ applicant, isMoving, onMove }: ApplicantCardProp
           type="button"
           className={styles.move}
           data-move={`${applicant.id}:next`}
-          disabled={isMoving || nextStage === null}
+          disabled={nextStage === null}
           aria-label={
             nextStage
               ? `${applicant.name}: ${stageLabel(nextStage)} 단계로 이동`

@@ -23,7 +23,7 @@ npm run lint       # oxlint
 | mock-api | Must 2·3 전제 | 완료 |
 | card-list | Must 1 (카드) | 완료 |
 | stage-move | Must 2 | 완료 |
-| optimistic-update | Must 3 | 예정 |
+| optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 예정 |
 | detail-panel | Must 5 | 예정 |
 | loading-error-empty | Must 6 | 예정 |
