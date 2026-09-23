@@ -12,6 +12,7 @@ npm run dev        # 개발 서버
 npm run build      # tsc -b && vite build
 npm run typecheck  # 타입 검사
 npm run lint       # oxlint
+npm test           # vitest (롤백·경쟁 상태 테스트)
 ```
 
 ## 구현 범위
@@ -29,9 +30,10 @@ npm run lint       # oxlint
 | responsive | 모바일 화면 대응 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 완료 |
+| rollback-test | Should (롤백·경쟁 상태 테스트) | 완료 |
 | detail-panel | Must 5 | 예정 |
 | loading-error-empty | Must 6 | 예정 |
-| a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
+| a11y-keyboard · undo · virtualization | Should | 예정 |
 
 저장되는 채용 단계는 서류검토 · 면접 · 처우협의 · 최종합격 · 불합격 5개다. 화면의 컬럼은 **서류검토 → 면접 → 처우협의 → 결과** 4개이며, 결과 컬럼이 최종합격과 불합격을 함께 담는다. 카드의 칩을 눌러 두 결과를 전환한다. 단계와 컬럼 정의 모두 `src/shared/stages.ts`가 단일 출처다.
 

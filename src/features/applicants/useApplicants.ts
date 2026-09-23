@@ -19,7 +19,7 @@ const MAX_TOASTS = 4
  * 지원자의 단계를 바꾼다. 자리 규칙은 서버(`moveStage`)와 똑같이 맞춘다.
  * 어긋나면 새로고침했을 때 카드가 다른 자리에 나타난다.
  */
-function applyMove(
+export function applyMove(
   applicants: Applicant[],
   id: string,
   toStage: StageId,
