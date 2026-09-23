@@ -1,21 +1,21 @@
 import type { ReactNode } from 'react'
-import type { Stage } from '../../shared/stages'
+import type { BoardColumn } from '../../shared/stages'
 import styles from './Column.module.css'
 
 type ColumnProps = {
-  stage: Stage
+  column: BoardColumn
   count: number
   children?: ReactNode
 }
 
-export function Column({ stage, count, children }: ColumnProps) {
-  const headingId = `column-${stage.id}-heading`
+export function Column({ column, count, children }: ColumnProps) {
+  const headingId = `column-${column.id}-heading`
 
   return (
     <section className={styles.column} aria-labelledby={headingId}>
       <header className={styles.header}>
         <h2 id={headingId} className={styles.title}>
-          {stage.label}
+          {column.label}
         </h2>
         <span className={styles.count}>
           {count}

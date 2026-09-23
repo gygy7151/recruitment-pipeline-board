@@ -23,13 +23,16 @@ npm run lint       # oxlint
 | mock-api | Must 2·3 전제 | 완료 |
 | card-list | Must 1 (카드) | 완료 |
 | stage-move | Must 2 | 완료 |
+| stage-merge | 결과 컬럼 통합 + 칩 토글 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 예정 |
 | detail-panel | Must 5 | 예정 |
 | loading-error-empty | Must 6 | 예정 |
 | a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
 
-채용 단계는 서류검토 → 면접 → 처우협의 → 최종합격 / 불합격 5개이며 `src/shared/stages.ts`가 단일 출처다.
+저장되는 채용 단계는 서류검토 · 면접 · 처우협의 · 최종합격 · 불합격 5개다. 화면의 컬럼은 **서류검토 → 면접 → 처우협의 → 결과** 4개이며, 결과 컬럼이 최종합격과 불합격을 함께 담는다. 카드의 칩을 눌러 두 결과를 전환한다. 단계와 컬럼 정의 모두 `src/shared/stages.ts`가 단일 출처다.
+
+컬럼 구성은 원문에 규정이 없어 지원자가 정한 가정이다. 근거는 DECISIONS.md를 참고.
 
 ## Mock API
 

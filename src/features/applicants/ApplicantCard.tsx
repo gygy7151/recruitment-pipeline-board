@@ -1,10 +1,17 @@
 import type { Applicant } from '../../shared/applicant'
-import { adjacentStage, stageLabel, type MoveDirection, type StageId } from '../../shared/stages'
+import {
+  adjacentStage,
+  stageLabel,
+  toggledResultStage,
+  type MoveDirection,
+  type StageId,
+} from '../../shared/stages'
 import styles from './ApplicantCard.module.css'
 
 type ApplicantCardProps = {
   applicant: Applicant
   onMove: (id: string, toStage: StageId, direction: MoveDirection) => void
+  onToggleResult: (id: string, toStage: StageId) => void
 }
 
 /** 2026-03-28 → "2026. 03. 28." 문자열만 다시 조합하므로 실행 환경의 시간대에 영향받지 않는다. */
@@ -13,9 +20,11 @@ function formatAppliedAt(isoDate: string): string {
   return `${year}. ${month}. ${day}.`
 }
 
-export function ApplicantCard({ applicant, onMove }: ApplicantCardProps) {
+export function ApplicantCard({ applicant, onMove, onToggleResult }: ApplicantCardProps) {
   const previousStage = adjacentStage(applicant.stage, 'prev')
   const nextStage = adjacentStage(applicant.stage, 'next')
+  // 결과 컬럼의 카드만 값이 있다. 나머지 컬럼에서는 칩이 읽기 전용 텍스트로 남는다.
+  const toggleTarget = toggledResultStage(applicant.stage)
 
   return (
     <li className={styles.card}>
@@ -23,7 +32,20 @@ export function ApplicantCard({ applicant, onMove }: ApplicantCardProps) {
       <span className={styles.role}>{applicant.role}</span>
       <span className={styles.meta}>
         <time dateTime={applicant.appliedAt}>{formatAppliedAt(applicant.appliedAt)}</time>
-        <span className={styles.stage}>{stageLabel(applicant.stage)}</span>
+
+        {toggleTarget ? (
+          <button
+            type="button"
+            className={`${styles.stage} ${applicant.stage === 'hired' ? styles.hired : styles.rejected}`}
+            data-toggle={applicant.id}
+            aria-label={`${applicant.name}: 현재 ${stageLabel(applicant.stage)}. 눌러서 ${stageLabel(toggleTarget)} 단계로 변경`}
+            onClick={() => onToggleResult(applicant.id, toggleTarget)}
+          >
+            {stageLabel(applicant.stage)}
+          </button>
+        ) : (
+          <span className={styles.stage}>{stageLabel(applicant.stage)}</span>
+        )}
 
         <button
           type="button"
