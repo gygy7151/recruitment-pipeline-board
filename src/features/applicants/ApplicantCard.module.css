@@ -6,6 +6,11 @@
   background: #fff;
   border: 1px solid #d0d7de;
   border-radius: 6px;
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: #8c959f;
 }
 
 .card + .card {
@@ -13,8 +18,27 @@
 }
 
 .name {
+  /* 버튼이지만 카드 제목처럼 보이게 기본 모양을 걷어낸다. */
+  align-self: flex-start;
+  padding: 0;
+  font: inherit;
   font-size: 14px;
   font-weight: 600;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+.name:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .role {

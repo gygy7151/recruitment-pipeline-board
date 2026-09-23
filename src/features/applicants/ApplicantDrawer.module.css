@@ -1,0 +1,110 @@
+/* dialog의 기본 가운데 배치를 풀고 오른쪽 끝에 화면 높이만큼 붙인다. */
+.drawer {
+  inset: 0 0 0 auto;
+  width: min(380px, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  color: #1f2328;
+  background: #fff;
+  border: none;
+  border-left: 1px solid #d0d7de;
+  box-shadow: -8px 0 24px rgb(31 35 40 / 15%);
+}
+
+.drawer::backdrop {
+  background: rgb(31 35 40 / 35%);
+}
+
+.content {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.role {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #59636e;
+}
+
+.close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  color: #59636e;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #eef1f5;
+}
+
+.close:focus-visible,
+.fields a:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 16px;
+  margin: 20px 0 0;
+  font-size: 14px;
+}
+
+.fields dt {
+  color: #59636e;
+}
+
+.fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.fields a {
+  color: #0969da;
+}
+
+.memo {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  /* 좁은 화면에서는 시트가 화면 전체를 덮는다. 380px 옆에 남는 몇 px 틈은 누를 곳으로 쓰기엔 너무 좁다. */
+  .drawer {
+    width: 100vw;
+    border-left: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  /* 손가락으로 누르는 화면에서는 권장치인 44px로 키운다. */
+  .close {
+    width: 44px;
+    height: 44px;
+  }
+}
