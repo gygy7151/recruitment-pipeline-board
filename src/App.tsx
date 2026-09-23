@@ -6,7 +6,8 @@ import { useApplicants } from './features/applicants/useApplicants'
 import styles from './App.module.css'
 
 export default function App() {
-  const { applicants, status, toasts, moveApplicant, dismissToast } = useApplicants()
+  const { applicants, status, toasts, moveApplicant, undoMove, dismissToast, setToastsPaused } =
+    useApplicants()
   const { query, setQuery, role, setRole, roles, filtered, isFiltering, isStale } =
     useApplicantFilter(applicants)
 
@@ -48,7 +49,12 @@ export default function App() {
         )}
       </main>
 
-      <MoveToasts toasts={toasts} onDismiss={dismissToast} />
+      <MoveToasts
+        toasts={toasts}
+        onUndo={undoMove}
+        onDismiss={dismissToast}
+        onPauseChange={setToastsPaused}
+      />
     </div>
   )
 }

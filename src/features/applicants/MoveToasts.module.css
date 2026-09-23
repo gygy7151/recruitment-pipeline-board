@@ -25,6 +25,26 @@
   flex: 1 1 auto;
 }
 
+.undo {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  font: inherit;
+  font-weight: 600;
+  color: #79c0ff;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.undo:hover {
+  text-decoration: underline;
+}
+
+.undo:focus-visible {
+  outline: 2px solid #79c0ff;
+  outline-offset: 1px;
+}
+
 .dismiss {
   flex: 0 0 auto;
   padding: 0 2px;
@@ -52,6 +72,7 @@
     max-width: none;
   }
 
+  .undo,
   .dismiss {
     min-width: 32px;
     min-height: 32px;

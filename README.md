@@ -31,7 +31,8 @@ npm run lint       # oxlint
 | search-filter | Must 4 | 완료 |
 | detail-panel | Must 5 | 예정 |
 | loading-error-empty | Must 6 | 예정 |
-| a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
+| undo | Should (되돌리기) — 앞 카드 기준 원위치 복원, Ctrl/⌘+Z | 완료 |
+| a11y-keyboard · rollback-test · virtualization | Should | 예정 |
 
 저장되는 채용 단계는 서류검토 · 면접 · 처우협의 · 최종합격 · 불합격 5개다. 화면의 컬럼은 **서류검토 → 면접 → 처우협의 → 결과** 4개이며, 결과 컬럼이 최종합격과 불합격을 함께 담는다. 카드의 칩을 눌러 두 결과를 전환한다. 단계와 컬럼 정의 모두 `src/shared/stages.ts`가 단일 출처다.
 
@@ -44,7 +45,7 @@ npm run lint       # oxlint
 - 모든 호출이 **200~800ms 난수 지연** 뒤 **약 15% 확률로 `MockApiError`를 던진다.** 조회와 이동 모두에 적용된다.
 - 실패율을 낮추거나 끄는 수단은 두지 않았다.
 - 단계 이동은 성공 시 localStorage에 저장되어 새로고침 후에도 유지된다.
-- 단계 변경 시 카드가 놓일 자리를 호출부가 정한다. 컬럼 간 이동은 목록 끝으로, 결과 토글은 제자리다.
+- 단계 변경 시 카드가 놓일 자리를 호출부가 정한다. 컬럼 간 이동은 목록 끝으로, 결과 토글은 제자리, 되돌리기와 실패 롤백은 이동 직전 앞 카드 바로 뒤다.
 - 시드 데이터 1,000건은 `src/api/seed.ts`가 고정 seed로 생성하므로 항상 같은 데이터가 나온다.
 
 측정값(브라우저에서 직접 호출): 지연 210~797ms(40회), 실패 65/500회 = 13.0%. 자세한 검증 표는 PROMPTS.md 참조.
