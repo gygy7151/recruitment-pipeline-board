@@ -2,13 +2,14 @@ import { useCallback, useMemo } from 'react'
 import type { Applicant } from '../../shared/applicant'
 import { COLUMNS, columnIdOf, type ColumnId, type MoveDirection, type StageId } from '../../shared/stages'
 import { ApplicantCard } from '../applicants/ApplicantCard'
+import type { StagePlacement } from '../../api/mock'
 import type { MoveOutcome } from '../applicants/useApplicants'
 import { Column } from './Column'
 import styles from './Board.module.css'
 
 type BoardProps = {
   applicants: Applicant[]
-  onMove: (id: string, toStage: StageId) => Promise<MoveOutcome>
+  onMove: (id: string, toStage: StageId, placement: StagePlacement) => Promise<MoveOutcome>
 }
 
 /**
@@ -41,8 +42,8 @@ export function Board({ applicants, onMove }: BoardProps) {
   }, [applicants])
 
   const runWithFocus = useCallback(
-    async (id: string, toStage: StageId, selectors: string[]) => {
-      const outcome = onMove(id, toStage)
+    async (id: string, toStage: StageId, placement: StagePlacement, selectors: string[]) => {
+      const outcome = onMove(id, toStage, placement)
 
       // 낙관적 반영이라 카드는 이미 옮겨갔다. 응답을 기다리지 않고 바로 포커스를 따라 보낸다.
       focusAfterRender(selectors)
@@ -59,15 +60,18 @@ export function Board({ applicants, onMove }: BoardProps) {
     (id: string, toStage: StageId, direction: MoveDirection) => {
       const other: MoveDirection = direction === 'next' ? 'prev' : 'next'
       // 경계 컬럼으로 옮겨가면 같은 방향 버튼이 비활성이 된다. 그때는 반대쪽 버튼을 잡는다.
-      void runWithFocus(id, toStage, [`[data-move="${id}:${direction}"]`, `[data-move="${id}:${other}"]`])
+      void runWithFocus(id, toStage, 'end', [
+        `[data-move="${id}:${direction}"]`,
+        `[data-move="${id}:${other}"]`,
+      ])
     },
     [runWithFocus],
   )
 
   const handleToggleResult = useCallback(
     (id: string, toStage: StageId) => {
-      // 토글해도 카드가 목록 끝으로 밀리므로 다시 그려진다. 칩으로 포커스를 되돌린다.
-      void runWithFocus(id, toStage, [`[data-toggle="${id}"]`])
+      // 결과 전환은 도착이 아니라 정정이므로 자리를 지킨다. 칩만 다시 그려지지만 포커스는 되돌려 둔다.
+      void runWithFocus(id, toStage, 'keep', [`[data-toggle="${id}"]`])
     },
     [runWithFocus],
   )

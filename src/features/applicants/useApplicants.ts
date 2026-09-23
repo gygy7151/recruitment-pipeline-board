@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getApplicants, moveStage } from '../../api/mock'
+import { getApplicants, moveStage, type StagePlacement } from '../../api/mock'
 import type { Applicant } from '../../shared/applicant'
 import { stageLabel, type StageId } from '../../shared/stages'
 
@@ -16,15 +16,25 @@ const TOAST_DURATION_MS = 5000
 const MAX_TOASTS = 4
 
 /**
- * 지원자를 대상 단계로 옮기고 배열 끝으로 보낸다.
- * 서버도 같은 순서를 만들므로 카드가 대상 컬럼의 마지막에 놓인다
- * (DECISIONS.md "가정: 키보드 조작 규칙" 3번).
+ * 지원자의 단계를 바꾼다. 자리 규칙은 서버(`moveStage`)와 똑같이 맞춘다.
+ * 어긋나면 새로고침했을 때 카드가 다른 자리에 나타난다.
  */
-function applyMove(applicants: Applicant[], id: string, toStage: StageId): Applicant[] {
+function applyMove(
+  applicants: Applicant[],
+  id: string,
+  toStage: StageId,
+  placement: StagePlacement,
+): Applicant[] {
   const index = applicants.findIndex((applicant) => applicant.id === id)
   if (index === -1) return applicants
 
   const next = applicants.slice()
+
+  if (placement === 'keep') {
+    next[index] = { ...next[index], stage: toStage }
+    return next
+  }
+
   const [moved] = next.splice(index, 1)
   next.push({ ...moved, stage: toStage })
   return next
@@ -111,9 +121,14 @@ export function useApplicants() {
   }, [])
 
   const sendMove = useCallback(
-    async (id: string, toStage: StageId, requestId: number): Promise<MoveOutcome> => {
+    async (
+      id: string,
+      toStage: StageId,
+      placement: StagePlacement,
+      requestId: number,
+    ): Promise<MoveOutcome> => {
       try {
-        const updated = await moveStage(id, toStage)
+        const updated = await moveStage(id, toStage, placement)
 
         // 서버가 실제로 썼으므로 확정 상태는 최신 요청이 아니더라도 갱신한다.
         confirmed.current.set(id, updated)
@@ -126,7 +141,7 @@ export function useApplicants() {
         setApplicants((previous) => {
           const current = previous.find((applicant) => applicant.id === id)
           if (!current || current.stage === updated.stage) return previous
-          return applyMove(previous, id, updated.stage)
+          return applyMove(previous, id, updated.stage, placement)
         })
 
         return 'confirmed'
@@ -137,7 +152,8 @@ export function useApplicants() {
         if (!base) return 'superseded'
 
         // 이 카드만 서버 확정 상태로 되돌린다. 다른 카드의 이동에는 손대지 않는다.
-        setApplicants((previous) => applyMove(previous, id, base.stage))
+        // 되돌릴 때도 같은 자리 규칙을 쓴다. 실패했을 때만 카드가 튀면 더 이상하다.
+        setApplicants((previous) => applyMove(previous, id, base.stage, placement))
         pushToast(`${base.name}: 이동하지 못해 ${stageLabel(base.stage)} 단계로 되돌렸습니다.`)
 
         return 'rolled-back'
@@ -147,16 +163,16 @@ export function useApplicants() {
   )
 
   const moveApplicant = useCallback(
-    (id: string, toStage: StageId): Promise<MoveOutcome> => {
+    (id: string, toStage: StageId, placement: StagePlacement): Promise<MoveOutcome> => {
       const requestId = ++requestCounter.current
       latestRequest.current.set(id, requestId)
 
       // 화면은 줄을 서지 않는다. 클릭 즉시 반영한다.
-      setApplicants((previous) => applyMove(previous, id, toStage))
+      setApplicants((previous) => applyMove(previous, id, toStage, placement))
 
       // 네트워크 호출만 카드별로 줄을 세운다.
       const pending = queues.current.get(id) ?? Promise.resolve()
-      const run = pending.then(() => sendMove(id, toStage, requestId))
+      const run = pending.then(() => sendMove(id, toStage, placement, requestId))
 
       // 줄이 실패로 끊기지 않게 한다. sendMove는 스스로 처리하므로 여기서는 삼킨다.
       queues.current.set(

@@ -102,12 +102,28 @@ export async function getApplicants(): Promise<Applicant[]> {
 }
 
 /**
- * 단계 이동.
- * 이동한 지원자를 배열 끝으로 옮긴다. 화면은 이 순서를 그대로 쓰므로 카드가 대상 컬럼의
- * 마지막에 놓인다 (DECISIONS.md "가정: 키보드 조작 규칙" 3번).
- * 어느 단계로든 이동을 허용한다. 이동 규칙은 화면이 정하고 여기서는 저장만 한다.
+ * 단계 변경 후 지원자가 놓일 자리.
+ *
+ * - `end`  목록 끝으로 보낸다. 다른 컬럼으로 옮기는 경우다. 화면이 이 순서를 그대로 쓰므로
+ *          카드가 대상 컬럼의 마지막에 놓인다 (DECISIONS.md "가정: 키보드 조작 규칙" 3번).
+ * - `keep` 자리를 그대로 둔다. 같은 컬럼 안에서 결과만 바꾸는 경우다. 도착이 아니라 정정이므로
+ *          자리가 움직일 이유가 없다.
+ *
+ * 화면에서만 자리를 지키고 서버는 끝으로 보내면 새로고침했을 때 카드가 튄다. 그래서 저장 쪽에도
+ * 같은 구분이 있어야 한다.
  */
-export async function moveStage(id: string, toStage: StageId): Promise<Applicant> {
+export type StagePlacement = 'end' | 'keep'
+
+/**
+ * 단계 변경.
+ * 어느 단계로든 변경을 허용한다. 이동 규칙은 화면이 정하고 여기서는 저장만 한다.
+ * `placement`에 기본값을 두지 않는다. 호출할 때마다 자리를 어떻게 할지 고르게 하기 위함이다.
+ */
+export async function moveStage(
+  id: string,
+  toStage: StageId,
+  placement: StagePlacement,
+): Promise<Applicant> {
   await simulateNetwork()
 
   const applicants = readStore()
@@ -117,8 +133,15 @@ export async function moveStage(id: string, toStage: StageId): Promise<Applicant
   }
 
   const moved: Applicant = { ...applicants[index], stage: toStage }
-  applicants.splice(index, 1)
-  applicants.push(moved)
+
+  if (placement === 'keep') {
+    // 자리를 바꾸지 않으므로 원소만 갈아끼운다. 그 사이 다른 카드가 움직여도 영향이 없다.
+    applicants[index] = moved
+  } else {
+    applicants.splice(index, 1)
+    applicants.push(moved)
+  }
+
   writeStore()
 
   return { ...moved }

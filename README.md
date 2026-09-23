@@ -24,6 +24,7 @@ npm run lint       # oxlint
 | card-list | Must 1 (카드) | 완료 |
 | stage-move | Must 2 | 완료 |
 | stage-merge | 결과 컬럼 통합 + 칩 토글 | 완료 |
+| toggle-in-place | 결과 토글 시 자리 유지 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 예정 |
 | detail-panel | Must 5 | 예정 |
@@ -41,6 +42,7 @@ npm run lint       # oxlint
 - 모든 호출이 **200~800ms 난수 지연** 뒤 **약 15% 확률로 `MockApiError`를 던진다.** 조회와 이동 모두에 적용된다.
 - 실패율을 낮추거나 끄는 수단은 두지 않았다.
 - 단계 이동은 성공 시 localStorage에 저장되어 새로고침 후에도 유지된다.
+- 단계 변경 시 카드가 놓일 자리를 호출부가 정한다. 컬럼 간 이동은 목록 끝으로, 결과 토글은 제자리다.
 - 시드 데이터 1,000건은 `src/api/seed.ts`가 고정 seed로 생성하므로 항상 같은 데이터가 나온다.
 
 측정값(브라우저에서 직접 호출): 지연 210~797ms(40회), 실패 65/500회 = 13.0%. 자세한 검증 표는 PROMPTS.md 참조.
