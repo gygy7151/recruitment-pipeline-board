@@ -34,3 +34,16 @@
   font-size: 14px;
   color: #59636e;
 }
+
+/*
+ * 알림 영역은 내용이 없어도 자리를 지킨다. 메시지가 나타날 때 보드가 밀리지 않고,
+ * 살아 있는 live region이라 스크린리더가 변경을 읽어준다.
+ */
+.notice {
+  flex: 0 0 auto;
+  min-height: 20px;
+  margin: 0;
+  padding: 4px 24px 0;
+  font-size: 13px;
+  color: #b1242c;
+}

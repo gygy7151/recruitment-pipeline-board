@@ -19,3 +19,20 @@ const STAGE_LABELS = new Map<StageId, string>(STAGES.map((stage) => [stage.id, s
 export function stageLabel(id: StageId): string {
   return STAGE_LABELS.get(id) ?? id
 }
+
+/** 카드 이동 방향. 화살표 키 가정(← 이전 / → 다음)과 버튼이 같은 모델을 쓴다. */
+export type MoveDirection = 'prev' | 'next'
+
+/**
+ * 한 단계 옆의 단계를 찾는다. 경계(첫 컬럼의 이전, 마지막 컬럼의 다음)에서는 null.
+ * 순환하지 않는다 (DECISIONS.md "가정: 키보드 조작 규칙" 2번).
+ */
+export function adjacentStage(from: StageId, direction: MoveDirection): StageId | null {
+  const index = STAGES.findIndex((stage) => stage.id === from)
+  if (index === -1) return null
+
+  const target = direction === 'prev' ? index - 1 : index + 1
+  if (target < 0 || target >= STAGES.length) return null
+
+  return STAGES[target].id
+}
