@@ -718,6 +718,8 @@ AI 도구: Claude Code. 기능마다 사용한 모델을 섹션 첫 줄에 표�
 
 모델: Claude Opus 5.5 (1M context)
 
+> 표기 정정: 커밋 c9deba9의 Co-Authored-By는 작업 지시문에 적힌 대로 "Claude Opus 5 (1M context)"로 나갔다. 실제 모델 ID는 `claude-opus-5-5`다. push한 커밋은 고치지 않는다는 규칙(amend 금지)에 따라 그 커밋은 그대로 두고, 이 기록과 이후 커밋을 Opus 5.5로 통일한다.
+
 병렬 워크트리(`feat/rollback-test`, main 51b88b4 기준)에서 진행했다.
 
 ### 프롬프트 1
@@ -773,4 +775,5 @@ AI 도구: Claude Code. 기능마다 사용한 모델을 섹션 첫 줄에 표�
   7개 모두 의도한 테스트가 깨졌고, 복원 후 13개 통과와 소스 diff가 `export` 한 줄뿐인 것을 확인했다.
 - 10회 반복 실행해 10회 모두 13/13 통과했다. 난수와 타이머를 쓰지 않아 결정적이다.
 - `npm test` / `npm run typecheck` / `npm run lint` / `npm run build` 통과.
+- 사용자 요청으로 이슈 #11을 `gh issue close`로 직접 닫았다. `Closes #11`은 main에 병합될 때 동작하는데, 병렬 브랜치라 아직 병합되지 않았기 때문이다.
 - 브라우저 검증은 하지 않았다. 화면 동작을 바꾸지 않았기 때문이다 (소스 변경은 `export` 한 줄). 그래서 포트 5176은 쓰지 않았다.
