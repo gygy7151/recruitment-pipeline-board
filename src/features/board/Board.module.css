@@ -1,8 +1,24 @@
+.boardShell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .board {
   display: flex;
+  /* 탭 막대를 뺀 나머지 공간을 채운다. min-height: 0이 있어야 컬럼 안이 스크롤된다. */
+  flex: 1 1 auto;
   gap: 16px;
   align-items: stretch;
-  height: 100%;
+  min-height: 0;
   padding: 16px 24px 24px;
   overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  /* 좁은 화면에서는 탭으로 고른 컬럼 하나만 보여준다. 가로 스크롤로 컬럼을 찾게 하지 않는다. */
+  .board {
+    padding: 12px;
+    overflow-x: hidden;
+  }
 }

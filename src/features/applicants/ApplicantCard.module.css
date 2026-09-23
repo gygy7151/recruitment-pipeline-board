@@ -49,6 +49,8 @@
 
 /* 결과 컬럼의 칩은 누를 수 있다. 색과 글자를 함께 써서 색각 이상이 있어도 구분된다. */
 button.stage {
+  /* 누를 수 있는 칩만 터치 영역 기준을 맞춘다. 읽기 전용 칩은 키울 이유가 없다. */
+  min-height: 24px;
   cursor: pointer;
 }
 
@@ -79,8 +81,9 @@ button.stage:focus-visible {
 
 .move {
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  /* WCAG 2.5.8은 마우스를 포함한 모든 입력에 24×24px 이상을 요구한다. 좁은 화면에서는 44px로 키운다. */
+  width: 24px;
+  height: 24px;
   padding: 0;
   font: inherit;
   font-size: 12px;
@@ -105,4 +108,36 @@ button.stage:focus-visible {
 .move:focus-visible {
   outline: 2px solid #0969da;
   outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 12px;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .role,
+  .meta {
+    font-size: 13px;
+  }
+
+  .meta {
+    gap: 8px;
+  }
+
+  /* 손가락으로 누르는 화면에서는 권장치인 44px로 키운다. */
+  .move {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+  }
+
+  button.stage {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
 }

@@ -26,6 +26,7 @@ npm run lint       # oxlint
 | stage-merge | 결과 컬럼 통합 + 칩 토글 | 완료 |
 | toggle-in-place | 결과 토글 시 자리 유지 | 완료 |
 | result-confirm | 결과 이동 시 합격 여부 확인 | 완료 |
+| responsive | 모바일 화면 대응 | 완료 |
 | optimistic-update | Must 3 | 완료 |
 | search-filter | Must 4 | 완료 |
 | detail-panel | Must 5 | 예정 |

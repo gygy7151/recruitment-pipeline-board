@@ -51,3 +51,21 @@
 .stale {
   opacity: 0.6;
 }
+
+@media (max-width: 768px) {
+  .header {
+    padding: 12px 12px 10px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .status {
+    padding: 16px 12px;
+  }
+}

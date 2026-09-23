@@ -47,3 +47,27 @@
   font-size: 13px;
   color: #59636e;
 }
+
+@media (max-width: 768px) {
+  .bar {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  /* 두 입력이 한 줄을 나눠 쓰고, 좁아지면 각자 줄을 차지한다. */
+  .field {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+
+  .input,
+  .select {
+    width: 100%;
+    height: 40px;
+  }
+
+  .result {
+    flex: 1 1 100%;
+    margin: 0;
+  }
+}

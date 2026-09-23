@@ -14,6 +14,7 @@ import { ApplicantCard } from '../applicants/ApplicantCard'
 import { ResultConfirmDialog } from '../applicants/ResultConfirmDialog'
 import type { MoveOutcome } from '../applicants/useApplicants'
 import { Column } from './Column'
+import { ColumnTabs } from './ColumnTabs'
 import styles from './Board.module.css'
 
 type BoardProps = {
@@ -52,6 +53,8 @@ function focusAfterRender(selectors: string[], onlyIfFocusLost = false) {
 
 export function Board({ applicants, onMove }: BoardProps) {
   const [pendingDecision, setPendingDecision] = useState<PendingDecision | null>(null)
+  // 좁은 화면에서 지금 보이는 컬럼. 넓은 화면에서는 네 컬럼이 모두 보여 쓰이지 않는다.
+  const [activeColumn, setActiveColumn] = useState<ColumnId>(COLUMNS[0].id)
 
   // 컬럼마다 filter를 돌리면 1,000건 × 컬럼 수만큼 순회하게 된다. 한 번만 순회해 컬럼별로 나눈다.
   const byColumn = useMemo(() => {
@@ -63,28 +66,46 @@ export function Board({ applicants, onMove }: BoardProps) {
   }, [applicants])
 
   const runWithFocus = useCallback(
-    async (id: string, toStage: StageId, placement: StagePlacement, selectors: string[]) => {
+    async (
+      id: string,
+      toStage: StageId,
+      placement: StagePlacement,
+      selectors: string[],
+    ): Promise<MoveOutcome> => {
       const outcome = onMove(id, toStage, placement)
 
       // 낙관적 반영이라 카드는 이미 옮겨갔다. 응답을 기다리지 않고 바로 포커스를 따라 보낸다.
       focusAfterRender(selectors)
 
+      const settled = await outcome
+
       // 실패해 되돌아오면 카드가 또 한 번 다시 그려진다. 그때도 포커스를 따라가게 한다.
-      if ((await outcome) === 'rolled-back') {
+      if (settled === 'rolled-back') {
         focusAfterRender(selectors, true)
       }
+
+      return settled
     },
     [onMove],
   )
 
   const moveToColumn = useCallback(
-    (id: string, toStage: StageId, direction: MoveDirection) => {
+    async (applicant: Applicant, toStage: StageId, direction: MoveDirection) => {
       const other: MoveDirection = direction === 'next' ? 'prev' : 'next'
+      const fromColumn = columnIdOf(applicant.stage)
+
+      // 좁은 화면에서는 옮겨간 컬럼으로 함께 넘어간다. 그러지 않으면 카드가 보이지 않는 곳으로
+      // 사라져 어디로 갔는지 알 수 없다.
+      setActiveColumn(columnIdOf(toStage))
+
       // 경계 컬럼으로 옮겨가면 같은 방향 버튼이 비활성이 된다. 그때는 반대쪽 버튼을 잡는다.
-      void runWithFocus(id, toStage, 'end', [
-        moveButtonSelector(id, direction),
-        moveButtonSelector(id, other),
+      const outcome = await runWithFocus(applicant.id, toStage, 'end', [
+        moveButtonSelector(applicant.id, direction),
+        moveButtonSelector(applicant.id, other),
       ])
+
+      // 되돌아왔으면 보이는 컬럼도 함께 되돌린다.
+      if (outcome === 'rolled-back') setActiveColumn(fromColumn)
     },
     [runWithFocus],
   )
@@ -96,7 +117,7 @@ export function Board({ applicants, onMove }: BoardProps) {
         setPendingDecision({ applicant, direction })
         return
       }
-      moveToColumn(applicant.id, toStage, direction)
+      void moveToColumn(applicant, toStage, direction)
     },
     [moveToColumn],
   )
@@ -114,7 +135,7 @@ export function Board({ applicants, onMove }: BoardProps) {
       if (!pendingDecision) return
       const { applicant, direction } = pendingDecision
       setPendingDecision(null)
-      moveToColumn(applicant.id, resultStageFor(hired), direction)
+      void moveToColumn(applicant, resultStageFor(hired), direction)
     },
     [pendingDecision, moveToColumn],
   )
@@ -129,22 +150,35 @@ export function Board({ applicants, onMove }: BoardProps) {
   }, [pendingDecision])
 
   return (
-    <div className={styles.board}>
-      {COLUMNS.map((column) => {
-        const items = byColumn.get(column.id) ?? []
-        return (
-          <Column key={column.id} column={column} count={items.length}>
-            {items.map((applicant) => (
-              <ApplicantCard
-                key={applicant.id}
-                applicant={applicant}
-                onMove={handleMove}
-                onToggleResult={handleToggleResult}
-              />
-            ))}
-          </Column>
-        )
-      })}
+    <div className={styles.boardShell}>
+      <ColumnTabs
+        activeColumn={activeColumn}
+        countOf={(column) => byColumn.get(column)?.length ?? 0}
+        onSelect={setActiveColumn}
+      />
+
+      <div className={styles.board}>
+        {COLUMNS.map((column) => {
+          const items = byColumn.get(column.id) ?? []
+          return (
+            <Column
+              key={column.id}
+              column={column}
+              count={items.length}
+              isActive={column.id === activeColumn}
+            >
+              {items.map((applicant) => (
+                <ApplicantCard
+                  key={applicant.id}
+                  applicant={applicant}
+                  onMove={handleMove}
+                  onToggleResult={handleToggleResult}
+                />
+              ))}
+            </Column>
+          )
+        })}
+      </div>
 
       <ResultConfirmDialog
         applicantName={pendingDecision?.applicant.name ?? null}
