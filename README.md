@@ -26,7 +26,7 @@ npm run lint       # oxlint
 | stage-merge | 결과 컬럼 통합 + 칩 토글 | 완료 |
 | toggle-in-place | 결과 토글 시 자리 유지 | 완료 |
 | optimistic-update | Must 3 | 완료 |
-| search-filter | Must 4 | 예정 |
+| search-filter | Must 4 | 완료 |
 | detail-panel | Must 5 | 예정 |
 | loading-error-empty | Must 6 | 예정 |
 | a11y-keyboard · rollback-test · undo · virtualization | Should | 예정 |
