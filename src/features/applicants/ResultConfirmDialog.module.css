@@ -1,0 +1,82 @@
+.dialog {
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 0;
+  color: #1f2328;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(31 35 40 / 20%);
+}
+
+.dialog::backdrop {
+  background: rgb(31 35 40 / 45%);
+}
+
+.content {
+  padding: 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.body {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #59636e;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.actions button {
+  height: 34px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.actions button:focus-visible {
+  outline: 2px solid #0969da;
+  outline-offset: 2px;
+}
+
+.cancel {
+  color: #1f2328;
+  background: #f6f8fa;
+}
+
+.cancel:hover {
+  background: #eef1f5;
+}
+
+.no {
+  color: #59636e;
+  background: #fff;
+}
+
+.no:hover {
+  background: #f0f2f5;
+}
+
+.yes {
+  color: #fff;
+  background: #1f883d;
+  border-color: #1a7f37;
+}
+
+.yes:hover {
+  background: #1a7f37;
+}

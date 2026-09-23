@@ -85,3 +85,19 @@ export function toggledResultStage(stage: StageId): StageId | null {
 
   return results[(index + 1) % results.length]
 }
+
+const RESULT_COLUMN_ID = COLUMNS[COLUMNS.length - 1].id
+
+/**
+ * 이 이동이 합격 여부를 확정하는가.
+ * 결과 컬럼이 마지막이므로 `next`로 결과 컬럼에 들어오는 경로는 처우협의뿐이다.
+ * 되돌리기 어려운 결정이라 여기서만 확인을 받는다 (DECISIONS.md "가정: 처우협의에서 결과로...").
+ */
+export function isResultDecision(toStage: StageId, direction: MoveDirection): boolean {
+  return direction === 'next' && columnIdOf(toStage) === RESULT_COLUMN_ID
+}
+
+/** 확인 창의 답을 단계로 옮긴다. 예 → 최종합격, 아니요 → 불합격. */
+export function resultStageFor(hired: boolean): StageId {
+  return hired ? 'hired' : 'rejected'
+}
